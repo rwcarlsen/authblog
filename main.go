@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 )
 
@@ -24,11 +23,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		key, err := otp.NewKeyFromURL(string(data))
-		if err != nil {
-			log.Fatal(err)
-		}
-		valid := totp.Validate(passcode, key.Secret())
+		secret := string(data)
+		valid := totp.Validate(passcode, secret)
 		if valid {
 			fmt.Println("code is valid")
 		} else {
@@ -40,6 +36,7 @@ func main() {
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "rwcr.net",
 		AccountName: user,
+		SecretSize:  24,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +57,7 @@ func main() {
 
 	if valid {
 		fmt.Println("passcode correct - secret registered")
-		ioutil.WriteFile(fname(user), []byte(key.String()), 0644)
+		ioutil.WriteFile(fname(user), []byte(key.Secret()), 0644)
 	}
 }
 
